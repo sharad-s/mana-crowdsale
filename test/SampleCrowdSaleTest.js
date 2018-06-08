@@ -27,6 +27,9 @@ contract("SampleCrowdsale", function([owner, wallet, investor]) {
     await advanceBlock();
   });
   beforeEach(async function() {
+    ownerBalance = await web3.fromWei(web3.eth.getBalance(owner).c[0]);
+    console.log(ownerBalance);
+
     this.openingTime = latestTime() + duration.weeks(1);
     this.closingTime = this.openingTime + duration.weeks(1);
     this.afterClosingTime = this.closingTime + duration.seconds(1);
