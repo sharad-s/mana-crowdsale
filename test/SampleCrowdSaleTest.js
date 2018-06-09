@@ -25,9 +25,28 @@ contract("SampleCrowdsale", function([owner, wallet, investor]) {
   before(async function() {
     // Advance to the next block to correctly read time in the solidity "now" function interpreted by ganache
     await advanceBlock();
+    //
+    // this.openingTime = latestTime() + duration.weeks(1);
+    // this.closingTime = this.openingTime + duration.weeks(1);
+    // this.afterClosingTime = this.closingTime + duration.seconds(1);
+    //
+    // this.token = await SampleCrowdsaleToken.new({ from: owner });
+    // this.vault = await RefundVault.new(wallet, { from: owner });
+    // this.crowdsale = await SampleCrowdsale.new(
+    //   this.openingTime,
+    //   this.closingTime,
+    //   RATE,
+    //   wallet,
+    //   GOAL,
+    //   CAP,
+    //   this.token.address
+    // );
+    // await this.token.transferOwnership(this.crowdsale.address);
+    // await this.vault.transferOwnership(this.crowdsale.address);
   });
   beforeEach(async function() {
-    ownerBalance = await web3.fromWei(web3.eth.getBalance(owner).c[0]);
+    // Log owner's ETH balance
+    ownerBalance = await web3.fromWei(web3.eth.getBalance(owner));
     console.log(ownerBalance);
 
     this.openingTime = latestTime() + duration.weeks(1);
@@ -93,6 +112,7 @@ contract("SampleCrowdsale", function([owner, wallet, investor]) {
     );
   });
 
+  // Sends 1 ETH from owner
   it("should reject payments after end", async function() {
     await increaseTimeTo(this.afterClosingTime);
     await this.crowdsale.send(ether(1)).should.be.rejectedWith(EVMRevert);
@@ -101,12 +121,14 @@ contract("SampleCrowdsale", function([owner, wallet, investor]) {
       .should.be.rejectedWith(EVMRevert);
   });
 
+  // Sends 20 ETH from owner
   it("should reject payments over cap", async function() {
     await increaseTimeTo(this.openingTime);
     await this.crowdsale.send(CAP);
     await this.crowdsale.send(1).should.be.rejectedWith(EVMRevert);
   });
 
+  // Sends 10 ETH from owner
   it("should allow finalization and transfer funds to wallet if the goal is reached", async function() {
     await increaseTimeTo(this.openingTime);
     await this.crowdsale.send(GOAL);
@@ -119,6 +141,7 @@ contract("SampleCrowdsale", function([owner, wallet, investor]) {
     afterFinalization.minus(beforeFinalization).should.be.bignumber.equal(GOAL);
   });
 
+  // Sends 1 ETH from owner
   it("should allow refunds if the goal is not reached", async function() {
     const balanceBeforeInvestment = web3.eth.getBalance(investor);
 
@@ -139,8 +162,8 @@ contract("SampleCrowdsale", function([owner, wallet, investor]) {
     const balanceAfterRefund = web3.eth.getBalance(investor);
     balanceBeforeInvestment.should.be.bignumber.equal(balanceAfterRefund);
   });
-  /*
 
+  // Sends 30 ETH from owner
   describe("when goal > cap", function() {
     // goal > cap
     const HIGH_GOAL = ether(30);
@@ -159,10 +182,13 @@ contract("SampleCrowdsale", function([owner, wallet, investor]) {
       );
     });
   });
-*/
 });
 
+//
+//
 /* Helper functions replacing imports */
+//
+//
 
 // import ether from "../helpers/ether";
 function ether(n) {
